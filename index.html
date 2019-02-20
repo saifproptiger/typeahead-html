@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+<input type="text" id="type-ahead" name="">
+<div id="result">
+</div>
+
+<script>
+	(function(){
+		const debounce = (func, delay) => {
+		  let inDebounce
+		  return function() {
+		    const context = this
+		    const args = arguments
+		    clearTimeout(inDebounce)
+		    inDebounce = setTimeout(() => func.apply(context, args), delay)
+		  }
+		}
+		let result = document.getElementById('result');
+		let input = document.getElementById('type-ahead');
+		input.addEventListener('change', function(e){
+			getTypeAheadResult(this.value);
+		});
+		let getTypeAheadResult = function(text) {
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+			    if (xhr.readyState == XMLHttpRequest.DONE) {
+			        setResult(JSON.parse(xhr.responseText));
+			    }
+			}
+			xhr.open('GET', `http://example.api.com/search?query=${text}&rows=5`, true);
+			xhr.send(null)
+		}
+
+		let setResult = function(data) {
+			data = data.data;
+			result.innerHTML = data.map(d => `<p>${d.displayText}</p>`).join('');
+		}
+		getTypeAheadResult = debounce(getTypeAheadResult, 100);
+
+	}());
+</script>
+
+</body>
+</html>
